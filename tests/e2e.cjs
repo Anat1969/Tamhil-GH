@@ -56,7 +56,7 @@ const BRIEF = {
     ok(await p.locator('.dock').isVisible(), 'השוואה: סרגל כפתורים קבוע');
     const sky = await p.locator('.sky-links a').first().getAttribute('href');
     const patch = JSON.parse(decodeURIComponent(sky.split('#patch=')[1].split('&')[0]));
-    ok(sky.startsWith('https://skyskiper-gh.vercel.app/#patch=') && patch['body.height.floors'] === 40 && patch['base.height.floors'] === 2, 'גורד שחקים: הקישור נושא את קומות תמהיל א (40 בגוף, 2 בפודיום)');
+    ok(sky.startsWith('https://anat1969.github.io/SkySkiper-GH/#patch=') && patch['body.height.floors'] === 40 && patch['base.height.floors'] === 2, 'גורד שחקים: הקישור נושא את קומות תמהיל א (40 בגוף, 2 בפודיום)');
 
     // עריכת תמהיל: הורדת 2 חדרים בתמהיל א עד שהוא מחזיק
     const inA = p.locator('.mix tbody tr').first().locator('input').first();

@@ -215,7 +215,8 @@ export function decodeMix(s: string | null, key: MixKey, name: string, fallback:
 
 // ---------- פתיחה בגורד שחקים ----------
 // אותו פרויקט שהמנוע בנה, כ-patch בפורמט הטיפולוגיות של גורד שחקים (#patch=).
-export const SKYSKIPER_URL = 'https://skyskiper-gh.vercel.app/';
+// Pages: מתעדכן בכל מיזוג ל-main, בלי מכסת פריסות (הכתובת הרשומה בתיק העבודות).
+export const SKYSKIPER_URL = 'https://anat1969.github.io/SkySkiper-GH/';
 export function skyskiperLink(r: Result, a: Assumptions, name: string) {
   const patch: Record<string, unknown> = {
     'site.width': a.siteW, 'site.depth': a.siteD,
