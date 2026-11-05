@@ -212,3 +212,17 @@ export function decodeMix(s: string | null, key: MixKey, name: string, fallback:
   if (n.length < 6) return fallback;
   return { key, name, units: { r2: n[0], r3: n[1], r4: n[2], r5: n[3] }, commercial: n[4], office: n[5] };
 }
+
+// ---------- פתיחה בגורד שחקים ----------
+// אותו פרויקט שהמנוע בנה, כ-patch בפורמט הטיפולוגיות של גורד שחקים (#patch=).
+export const SKYSKIPER_URL = 'https://skyskiper-gh.vercel.app/';
+export function skyskiperLink(r: Result, a: Assumptions, name: string) {
+  const patch: Record<string, unknown> = {
+    'site.width': a.siteW, 'site.depth': a.siteD,
+    'base.footprint.width': a.podiumW, 'base.footprint.depth': a.podiumD,
+    'base.height.floors': r.podiumFloors, 'base.height.floorHeight': PODIUM_FH, 'base.height.doubleGround': false,
+    'body.footprint.width': a.plateW, 'body.footprint.depth': a.plateD,
+    'body.height.floors': r.bodyFloors, 'body.height.floorHeight': BODY_FH,
+  };
+  return `${SKYSKIPER_URL}#patch=${encodeURIComponent(JSON.stringify(patch))}&name=${encodeURIComponent(name)}`;
+}

@@ -241,3 +241,6 @@
   .method { gap: 10px; padding-top: 10px; }
   .notes .why { display: none; }
 }
+.sky-links { display: flex; align-items: center; gap: 6px; padding-top: 4px; }
+.sky-links .chip, .sky-btn { text-decoration: none; color: var(--ink); }
+.sky-btn { display: block; text-align: center; margin-top: 6px; padding: 7px; font-size: 13px; }

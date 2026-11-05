@@ -5,7 +5,7 @@ import Towers from '../components/Towers';
 import MoneyBars from '../components/MoneyBars';
 import MixTable from '../components/MixTable';
 import { useStudio } from '../lib/state';
-import { bestMix, budgetHeight, evaluate, sumUnits, type MixKey } from '../lib/engine';
+import { bestMix, budgetHeight, evaluate, skyskiperLink, sumUnits, type MixKey } from '../lib/engine';
 import { L, burdenText, costDriver, headline, heightText, mil, n0, pc, stabilityText, verdictText } from '../lib/insights';
 import { PRESETS } from '../data/mixes';
 import { UNITS } from '../data/assumptions';
@@ -89,6 +89,7 @@ export default function Studio() {
               <Rich as="p">{`**${n0(bestR.units)}** דירות בתקציב${extra > 0 ? `, **${n0(extra)}** יותר מהתמהיל שמחזיק היום` : ''}. **${bestR.floors}** קומות, רווח **${pc(bestR.margin)}**.`}</Rich>
               <div className="best-mix">{(['r2', 'r3', 'r4', 'r5'] as const).map((t) => <span key={t}><b>{best.units[t]}</b>{UNITS[t].short}</span>)}</div>
               <button className="press btn primary" onClick={() => set({ [fixFor]: { ...best, key: fixFor, name: 'התמהיל שמחזיק' } })}>החלפת תמהיל {L(fixFor)} בזה</button>
+              <a className="press btn sky-btn" target="_blank" rel="noreferrer" href={skyskiperLink(bestR, a, `התמהיל שמחזיק · ${bestR.units} דירות`)}>פתיחה בגורד שחקים</a>
             </div>
           )}
         </aside>
@@ -97,6 +98,12 @@ export default function Studio() {
           <div className="pane-towers focus-box">
             <Towers c={c} a={a} lines={lines} />
             <div className="ins"><Rich as="p" className="ins-t">{ht.title}</Rich><Rich as="p" className="ins-s">{ht.sub}</Rich></div>
+            <div className="sky-links">
+              <span className="label">בתלת־ממד, בגורד שחקים</span>
+              {(['A', 'B'] as MixKey[]).map((k) => (
+                <a key={k} className="press chip" target="_blank" rel="noreferrer" href={skyskiperLink(c[k], a, `תמהיל ${L(k)} · ${c[k].mix.name}`)}>תמהיל {L(k)}</a>
+              ))}
+            </div>
           </div>
           <div className="pane-money money-box">
             <MoneyBars c={c} a={a} />
