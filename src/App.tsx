@@ -4,12 +4,19 @@ import { go, useRoute } from './lib/route';
 import Home from './pages/Home';
 import Studio from './pages/Studio';
 import Method from './pages/Method';
+import Chain from './components/Chain';
+import { useStudio } from './lib/state';
+import { programaLink, skyFor } from './lib/links';
 
 const NAV: [string, string][] = [['/', 'בית'], ['/compare', 'השוואה'], ['/method', 'שיטה']];
 interface BIPEvent extends Event { prompt: () => Promise<void> }
 
 export default function App() {
   const { path } = useRoute();
+  // השרשרת בסרגל העליון, בכל דף: חזרה לפרוגרמה עם התמהיל שמחזיק, והמשך למגדל שלו
+  const { cmp: c, a } = useStudio();
+  const lead = c[c.winner ?? c.closer];
+  const chainLinks = { 1: programaLink(lead.mix, a.cityId), 3: skyFor(lead, a, `תמהיל ${(c.winner ?? c.closer) === 'A' ? 'א' : 'ב'} · ${lead.mix.name}`) };
   const [install, setInstall] = useState<BIPEvent | null>(null);
   useEffect(() => {
     const on = (e: Event) => { e.preventDefault(); setInstall(e as BIPEvent); };
@@ -38,6 +45,7 @@ export default function App() {
               <button key={p} className="tab" aria-current={(p === '/' ? path === '/' : path.startsWith(p)) ? 'page' : undefined} onClick={() => go(p, p === '/compare' ? Object.fromEntries(new URLSearchParams(location.hash.split('?')[1] ?? '')) : undefined)}>{l}</button>
             ))}
           </nav>
+          <Chain step={2} links={chainLinks} />
           <AIMenu items={items} status="" />
         </div>
       </header>
