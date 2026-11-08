@@ -11,6 +11,8 @@ import { PRESETS } from '../data/mixes';
 import { UNITS } from '../data/assumptions';
 import { CITIES } from '../data/program';
 import { requestBrief, type Brief } from '../lib/ai';
+import Chain from '../components/Chain';
+import { programaLink, skyFor } from '../lib/links';
 
 type Pane = 'answer' | 'towers' | 'money' | 'mix';
 const PANES: [Pane, string][] = [['answer', 'תשובות'], ['towers', 'מגדלים'], ['money', 'כסף'], ['mix', 'תמהיל']];
@@ -123,6 +125,8 @@ export default function Studio() {
 
       <nav className="dock" aria-label="פעולות">
         <div className="dock-in">
+          <Chain step={2} links={{ 1: programaLink((c.winner ? c[c.winner] : bestR ?? c[c.closer]).mix, a.cityId), 3: skyFor(c.winner ? c[c.winner] : c[c.closer], a, `תמהיל ${L(c.winner ?? c.closer)} · ${(c.winner ? c[c.winner] : c[c.closer]).mix.name}`) }} />
+          <span className="dock-sep" />
           <span className="label">השוואות מוכנות</span>
           {PRESETS.map((p) => {
             const on = sumUnits(p.A) === sumUnits(A) && sumUnits(p.B) === sumUnits(B) && p.A.office === A.office && p.B.office === B.office && p.A.units.r2 === A.units.r2;

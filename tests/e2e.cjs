@@ -66,6 +66,16 @@ const BRIEF = {
     const after = await p.locator('.lens-h').innerText();
     ok(after !== '' && !/א לא/.test(after), 'עריכה: הכותרת מתעדכנת (' + after + ')');
 
+    // שרשרת: מהתמהיל לפרוגרמה ולגורד שחקים
+    ok(await p.locator('.chain-bar [aria-current="step"]').innerText().then((t) => t.includes('תמהיל')), 'שרשרת: שלב 2 מסומן');
+    const back = await p.locator('.chain-bar a', { hasText: 'פרוגרמה' }).getAttribute('href');
+    ok(back.startsWith('https://programa-gh.vercel.app/#/program?m=') && /c=ashdod/.test(back), 'שרשרת: חזרה לפרוגרמה עם התמהיל והעיר (' + back + ')');
+    const fwd = await p.locator('.chain-bar a', { hasText: 'מגדל' }).getAttribute('href');
+    ok(fwd.startsWith('https://anat1969.github.io/SkySkiper-GH/#patch='), 'שרשרת: המשך לגורד שחקים');
+    // קבלה מהפרוגרמה: תמהיל השכונה כתמהיל א
+    await p.goto(BASE + '#/compare?a=42.42.84.42.1200.0&an=' + encodeURIComponent('התמהיל של השכונה') + '&c=ashdod', { waitUntil: 'networkidle' });
+    ok((await p.locator('.mix thead').innerText()).includes('התמהיל של השכונה') && (await p.locator('.mix tbody input').first().inputValue()) === '42', 'שרשרת: תמהיל השכונה מהפרוגרמה נקלט כתמהיל א');
+
     // התמהיל שמחזיק
     await p.goto(BASE + '#/compare', { waitUntil: 'networkidle' });
     await p.evaluate(() => localStorage.clear());
