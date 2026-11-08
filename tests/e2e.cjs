@@ -76,6 +76,15 @@ const BRIEF = {
     await p.goto(BASE + '#/compare?a=42.42.84.42.1200.0&an=' + encodeURIComponent('התמהיל של השכונה') + '&c=ashdod', { waitUntil: 'networkidle' });
     ok((await p.locator('.mix thead').innerText()).includes('התמהיל של השכונה') && (await p.locator('.mix tbody input').first().inputValue()) === '42', 'שרשרת: תמהיל השכונה מהפרוגרמה נקלט כתמהיל א');
 
+    // תיק מהפרוגרמה: מגרש 101 בתמל/2022, עירייה. המגרש והקומות מטבלה 5, ו"החלופה המשותפת".
+    const dz = Buffer.from(JSON.stringify({ v: 1, role: 'city', city: 'ashdod', plan: { id: 'tml-2022', number: 'תמל/2022', name: 'x' }, lot: { id: '101', areaM2: 2241, units: 203, floors: 31, res: 25590, com: 343, emp: 3478, pub: 680 }, planUnits: 2160, planPublic: 5020, planOpen: 7439 })).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    await p.goto(BASE + '#/compare?a=41.51.71.40.343.3478&an=' + encodeURIComponent('תמהיל המדיניות') + '&b=71.71.41.20.343.3478&bn=' + encodeURIComponent('תמהיל השוק') + '&c=ashdod&d=' + dz, { waitUntil: 'networkidle' }); await p.waitForTimeout(600);
+    const ts = (await p.locator('.strip').innerText()).replace(/\s+/g, ' ');
+    ok(/עד 31 קומות/.test(ts) && /חורג ב-3/.test(ts) && /מעל הזכויות/.test(ts), 'תיק בתמהיל: המדיניות חורגת מ-31 הקומות ומהזכויות (' + ts.slice(0, 140) + ')');
+    ok((await p.locator('.best h4').innerText()) === 'החלופה המשותפת' && /31 קומות מתוך 31/.test(await p.locator('.best').innerText()), 'תיק בתמהיל: החלופה המשותפת עומדת ב-31 קומות');
+    const backD = await p.locator('.topbar .chain-bar a', { hasText: 'פרוגרמה' }).getAttribute('href');
+    ok(/#\/site\?/.test(backD) && /d=/.test(backD) && /m=/.test(backD), 'תיק בתמהיל: חזרה לפרוגרמה עם התיק והתמהיל');
+
     // התמהיל שמחזיק
     await p.goto(BASE + '#/compare', { waitUntil: 'networkidle' });
     await p.evaluate(() => localStorage.clear());

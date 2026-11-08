@@ -261,3 +261,27 @@
   .topbar .chain-bar .chip .lbl { display: none; }
   .topbar .chain-arrow { display: none; }
 }
+
+/* תיק הפרויקט: רצועה מתחת לסרגל העליון */
+.strip { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 4px 16px; align-items: center; padding: 6px clamp(12px, 2vw, 28px); background: var(--rule-soft); border-bottom: 1px solid var(--rule); font-size: 12.5px; }
+.strip-head { display: flex; flex-direction: column; gap: 2px; }
+.strip-head b { font-size: 13px; }
+.strip-roles { display: inline-flex; gap: 4px; margin-top: 2px; }
+.strip-roles .chip { font-size: 11px; padding: 2px 8px; }
+.strip-q { max-width: 260px; line-height: 1.4; }
+.strip-facts { display: flex; flex-wrap: wrap; gap: 4px 6px; margin: 0; }
+.strip-facts > div { background: #fff; padding: 3px 8px; display: flex; gap: 6px; align-items: baseline; border-inline-start: 3px solid var(--card-dark); }
+.strip-facts > div.in { border-inline-start-color: var(--sky); }
+.strip-facts > div.ok { border-inline-start-color: var(--permit); }
+.strip-facts > div.bad { border-inline-start-color: var(--breach); background: var(--breach-wash); }
+.strip-facts dt { color: var(--ink-mute); font-size: 11px; }
+.strip-facts dd { margin: 0; }
+.chain-role { margin-inline-end: 4px; }
+.chain-bar .chip.off { opacity: .45; }
+@media (max-width: 900px) {
+  .strip { grid-template-columns: minmax(0, 1fr); }
+  .strip-q { max-width: none; }
+  .strip-facts { flex-wrap: nowrap; overflow-x: auto; }
+  .strip-facts > div { flex: 0 0 auto; }
+  .topbar .chain-role { display: none; }
+}

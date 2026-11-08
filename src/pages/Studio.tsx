@@ -5,7 +5,7 @@ import Towers from '../components/Towers';
 import MoneyBars from '../components/MoneyBars';
 import MixTable from '../components/MixTable';
 import { useStudio } from '../lib/state';
-import { bestMix, budgetHeight, evaluate, skyskiperLink, sumUnits, type MixKey } from '../lib/engine';
+import { bestMix, budgetHeight, commonMix, evaluate, skyskiperLink, sumUnits, type MixKey } from '../lib/engine';
 import { L, burdenText, costDriver, headline, heightText, mil, n0, pc, stabilityText, verdictText } from '../lib/insights';
 import { PRESETS } from '../data/mixes';
 import { UNITS } from '../data/assumptions';
@@ -17,7 +17,7 @@ type Pane = 'answer' | 'towers' | 'money' | 'mix';
 const PANES: [Pane, string][] = [['answer', 'תשובות'], ['towers', 'מגדלים'], ['money', 'כסף'], ['mix', 'תמהיל']];
 
 export default function Studio() {
-  const { A, B, a, cmp: c, set } = useStudio();
+  const { A, B, a, cmp: c, set, dossier } = useStudio();
   const [pane, setPane] = useState<Pane>('answer');
   const [brief, setBrief] = useState<Brief | null>(null);
   const [briefState, setBriefState] = useState<'idle' | 'busy' | 'error'>('idle');
@@ -27,7 +27,11 @@ export default function Studio() {
   const lines = useMemo(() => ({ A: budgetHeight(A, a), B: budgetHeight(B, a) }), [c]); // eslint-disable-line react-hooks/exhaustive-deps
   const loser: MixKey = c.winner === 'A' ? 'B' : c.winner === 'B' ? 'A' : c.closer === 'A' ? 'B' : 'A';
   const fixFor: MixKey = c[loser].holds ? (c.A.units >= c.B.units ? 'A' : 'B') : loser;
-  const best = useMemo(() => bestMix(c[fixFor].mix, a), [c, fixFor, a]);
+  // עם תיק מהתב"ע: החלופה המשותפת (מדיניות, זכויות, קומות ותקציב). בלי תיק: התמהיל שמחזיק (הכי הרבה דירות בתקציב).
+  const lim = dossier ? { units: dossier.lot.units, res: dossier.lot.res, floors: dossier.lot.floors } : null;
+  const common = useMemo(() => (lim ? commonMix(c[fixFor].mix, a, lim) : null), [c, fixFor, a]); // eslint-disable-line react-hooks/exhaustive-deps
+  const bestName = lim ? 'החלופה המשותפת' : 'התמהיל שמחזיק';
+  const best = useMemo(() => (lim ? common?.mix ?? null : bestMix(c[fixFor].mix, a)), [c, fixFor, a, common]); // eslint-disable-line react-hooks/exhaustive-deps
   const bestR = useMemo(() => (best ? evaluate(best, a) : null), [best, a]);
   const extra = bestR ? bestR.units - Math.max(...(['A', 'B'] as MixKey[]).filter((k) => c[k].holds).map((k) => c[k].units), 0) : 0;
 
@@ -84,13 +88,21 @@ export default function Studio() {
         <aside className="col-mix pane-mix" aria-label="עריכת התמהילים">
           <h2 className="col-h">מה בכל תמהיל</h2>
           <MixTable A={A} B={B} onChange={set} />
+          {lim && !best && (
+            <div className="best tone tone-problem" data-info>
+              <h4>אין חלופה משותפת</h4>
+              <Rich as="p">{`אף תמהיל של **${n0(lim.units)}** יח"ד לא עומד יחד במדיניות, בזכויות, ב-**${lim.floors}** קומות ובתקציב. צריך להגדיל תקציב, להקטין דירות או לבקש הקלה.`}</Rich>
+            </div>
+          )}
           {best && bestR && (
             <div className="best tone tone-solution" data-info>
-              <h4>התמהיל שמחזיק</h4>
-              <Rich as="p">{`**${n0(bestR.units)}** דירות בתקציב${extra > 0 ? `, **${n0(extra)}** יותר מהתמהיל שמחזיק היום` : ''}. **${bestR.floors}** קומות, רווח **${pc(bestR.margin)}**.`}</Rich>
+              <h4>{bestName}</h4>
+              {lim
+                ? <Rich as="p">{`עומדת במדיניות, בתב"ע ובתקציב: **${n0(common!.family)}** דירות משפחתיות מתוך **${n0(lim.units)}**, **${bestR.podiumFloors + bestR.bodyFloors}** קומות מתוך **${lim.floors}**, רווח **${pc(bestR.margin)}**.`}</Rich>
+                : <Rich as="p">{`**${n0(bestR.units)}** דירות בתקציב${extra > 0 ? `, **${n0(extra)}** יותר מהתמהיל שמחזיק היום` : ''}. **${bestR.floors}** קומות, רווח **${pc(bestR.margin)}**.`}</Rich>}
               <div className="best-mix">{(['r2', 'r3', 'r4', 'r5'] as const).map((t) => <span key={t}><b>{best.units[t]}</b>{UNITS[t].short}</span>)}</div>
-              <button className="press btn primary" onClick={() => set({ [fixFor]: { ...best, key: fixFor, name: 'התמהיל שמחזיק' } })}>החלפת תמהיל {L(fixFor)} בזה</button>
-              <a className="press btn sky-btn" target="_blank" rel="noreferrer" href={skyskiperLink(bestR, a, `התמהיל שמחזיק · ${bestR.units} דירות`)}>פתיחה בגורד שחקים</a>
+              <button className="press btn primary" onClick={() => set({ [fixFor]: { ...best, key: fixFor, name: bestName } })}>החלפת תמהיל {L(fixFor)} בזה</button>
+              <a className="press btn sky-btn" target="_blank" rel="noreferrer" href={skyskiperLink(bestR, a, `${bestName} · ${bestR.units} דירות`)}>פתיחה בגורד שחקים</a>
             </div>
           )}
         </aside>

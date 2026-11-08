@@ -227,3 +227,28 @@ export function skyskiperLink(r: Result, a: Assumptions, name: string) {
   };
   return `${SKYSKIPER_URL}#patch=${encodeURIComponent(JSON.stringify(patch))}&name=${encodeURIComponent(name)}`;
 }
+
+// ---------- החלופה המשותפת ----------
+// כשמגיע תיק עם מגרש מהתב"ע: אותו מספר יח"ד כמו בתב"ע, ותמהיל שעומד בכל התנאים יחד:
+// מדיניות אשדוד (לפחות 20% בשני חדרים ו-10% בשלושה), זכויות המגורים והקומות בטבלה 5, והתקציב והרווח.
+// מבין אלה שעומדים: הכי הרבה דירות משפחתיות (4 ו-5 חדרים), וכשיש תיקו, הרווח הגבוה.
+export interface LotLimits { units: number; res: number; floors: number }
+export function commonMix(base: Mix, a: Assumptions, lim: LotLimits): { mix: Mix; family: number } | null {
+  const crownFloors = presets.default.crown.height.floors;
+  let best: { mix: Mix; family: number; margin: number } | null = null;
+  for (let s2 = 0.2; s2 <= 0.6001; s2 += 0.05) for (let s3 = 0.1; s3 <= 0.6001; s3 += 0.05) for (let s5 = 0; s5 <= 0.4001; s5 += 0.05) {
+    const s4 = 1 - s2 - s3 - s5;
+    if (s4 < -1e-9) continue;
+    const r2 = Math.round(lim.units * s2), r3 = Math.round(lim.units * s3), r5 = Math.round(lim.units * s5);
+    const r4 = lim.units - r2 - r3 - r5;
+    if (r4 < 0) continue;
+    const m: Mix = { ...base, name: 'החלופה המשותפת', units: { r2, r3, r4, r5 } };
+    const gross = UNIT_TYPES.reduce((x, t) => x + m.units[t] * UNITS[t].net, 0) * a.grossFactor;
+    if (gross > lim.res * 1.001) continue;
+    const t = fastTotals(m, a);
+    if (!t.holds || t.floors - crownFloors > lim.floors) continue;
+    const family = r4 + r5;
+    if (!best || family > best.family || (family === best.family && t.margin > best.margin)) best = { mix: m, family, margin: t.margin };
+  }
+  return best && { mix: best.mix, family: best.family };
+}
